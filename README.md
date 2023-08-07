@@ -1,45 +1,50 @@
 # Yet Another DoIP(YA-DoIP)
 
-本项目是Python3实现跨平台的，完全符合**ISO-13400 (2019)**国际规范的，同步非阻塞IO的，Diagnostic over IP (DoIP)**协议栈**，协议栈部分可以实现DoIP数据的收发 && 解析等。搭配本项目附赠的上位机client的demo，你可以进一步获得对于UDS协议（**ISO14229**）的支持，从而实现：
-1. 车载以太网ECU的诊断/刷写
-2. DoIP转DoCAN ECU的诊断/刷写
-3. 多路DoIP ECU的并行刷写
-4. 甚至可以搭配DoIP server节点的能力实现**并行诊断/刷写**DoCAN ECU们:smirk:
-5. 即插即用，搭配Wireshark你甚至可以抛弃贵重的设备，诸如Vector 5640等
+This project is a synchronized and non-block-io version of Diagnostic over IP(DoIP) stack. It is cross-platform written in Python3 and totally refers to **ISO-13400 (2019)**. The stack part can do DoIP packet recv, send and parse. With the demo of client, you can furthermore implement a diagnostic tool which entirely confirms to UDS(**ISO-13400 (2019)**).
+You can get these features:
+1. Diagnostic/Flash of vehicle ethernet ECUs
+2. Diagnostic/Flash of DoIP->DoCAN ECUs
+3. Parallel flash of Multi-DoIP ECUs
+4. Parallel flash of Multiple DoCAN ECUs with a powerful DoIP server:smirk:
+5. Plug & Use, with the help of Wireshark maybe you can get rid of expensive devices, e.g. Vector 5640
 
-本项目遵循MIT LISCENCE，如果各位业界大佬们有兴趣，可以直接通过本仓库提PR，也可邮箱联系我chenxiao9609@foxmail.com。
+This project is under MIT LICENCE. If you are interested, you can make PRs or just email me: chenxiao9609@foxmail.com.
 
-## 1. 初衷
+## 1. Purpose
 
-本人在OEM车厂~~练习两年半~~，由于工作相关性我想要实现一个DoIP的上位机，在全网寻找一番后，发现仅有Jacob Schaer在github上实现了[同步阻塞IO版本的协议栈](https://github.com/jacobschaer/python-doipclient/)，对于实现一个简易的上位机来说已经够用了，但是个人认为**扩展性不够强且实现并行功能的话比较困难**。
+I'm currently working for an Automotive OEM. Due to job revelance, I created this project. At the beginning, I searched for some existing handy tools, however; I only found a [synchronized-block-io version of DoIP stack](https://github.com/jacobschaer/python-doipclient/) created by Jacob Schaer on github. It is already enough for a simple client, but for myself **it seems not very scalable and maybe it is not suitable for multi clients**.
 
-在没有现成轮子的情况下，我决定从头实现一个可重入的同步非阻塞IO版本的DoIP协议栈，并搭配其实现了可以**并行刷写的上位机**:smirk:。同时，我也希望大家能够和BMW一样，能够积极推进在智能汽车领域的开源氛围。
+Without wheels, I decided to make a reentrant version of non-block-io DoIP stack and I also made clients **supporting parallel flashing ECUs**:smirk:. Meanwhile, I hope we can contribute to open source software in intelligent car industry just like what BMW do.
 
-## 2. 项目介绍
+## 2. Intro
 
-本项目实现的是一个轻量级的完全符合**ISO-13400 (2019)**国际规范的同步非阻塞IO版本的DoIP协议栈，支持一个stack接入多个client，采用Python3编写。YA-DoIP非常简单易用，整个stack部分的核心代码甚至只有不到200行，~~我是说真的，我不是培训班广告~~。client部分的话由于server端刷写的知识产权和保密原因，我暂时不会开源全部，只会开放一个demo供大家参考，但是相信我，大家可以通过我提供的demo根据各个OEM制定的标准进行愉快的玩耍了。
+The project has implemented a lightweight, fully compliant with **ISO-13400 (2019)** , synchronized non-blocking-io version of the DoIP protocol stack. It supports multiple clients accessing a single stack and is written in Python 3. YA-DoIP is extremely simple and easy to use, with the core code of the entire stack being less than 200 lines. As for the client part, due to intellectual property and confidentiality reasons related to the server-side flashing knowledge, I won't be open-sourcing everything for now. I will only provide a demo for reference. But trust me, everyone can have fun playing around with it by using the demo I provide based on the standards set by various OEMs.
 
-针对类似于ISO13400-2中描述的经典拓扑图，你可以实现对不同DoIP node的并行诊断刷写或对DoCAN node的串行诊断刷写。
+In line with the classic topology described in ISO13400-2, you can perform parallel diagnostic/flash on different DoIP nodes or sequential diagnostic/flash on DoCAN nodes.
 
 <div align=center><img src="./.assets/2-ISO13400经典拓扑图.jpg#pic_center" alt="2-ISO13400经典拓扑图" /></div>
 
-针对类似于下图中的树形结构的拓扑图，你可以实现对DoIP node下不同CAN BUS的ECU的并行诊断/刷写，如图中DoCAN Node 1与DoCAN Node 4。
+Regarding a tree-like topology diagram similar to the one shown below, you can implement parallel diagnostic/flash for different DoCAN ECUs under DoIP nodes, such as DoCAN Node 1 and DoCAN Node 4 in the diagram.
 
 <div align=center><img src="./.assets/3-经典树形拓扑图.jpg" alt="3-经典树形拓扑图" /></div>
 
-~~下面是本项目支持并行刷写的证据：~~
+~~Below is the evidence of parallel flashing supported by this project:~~
 
 <div align=center><img src="./.assets/1-证据.png" alt="1-证据" /></div>
 
-**项目的各文件说明：**
+**Explanation of Files:**
 
-- stack.py: DoIP协议栈的核心部分，支持DoIP数据的收发与解析，当前我已经实现了TCP部分的核心（包括Routing Activation、Diagnostic Message等），~~由于我懒~~UDP部分还没有实现，但是已经不影响整体stack的使用。
-- messages.py: DoIP协议栈的底层消息格式的文件，是我从Jacob Schaer的项目原始获得并进行了一些微调。用Jacob Schaer的原话来说“*Quoted descriptions were copied or paraphrased from ISO-13400-2-2019 (E).*”，所以我直接在其基础上进行了复用~~我懒~~，避免了重复的轮子。
-- client-demo.py：搭配stack实现的支持并行的demo文件，其中实现了一个基本的DoIPClient的类，你可以通过继承这个类并重构自己的相应函数来实现功能。我仅给各位专家提供一个可行的思路，下文进行详细解释，大家完全可以自由发挥。
+- **stack.py**: This file contains the core components of the DoIP protocol stack. It supports sending and receiving DoIP data and parsing it. I have already implemented the core parts for the TCP aspect (including Routing Activation, Diagnostic Messages, etc.). The UDP part is pending implementation, but it does not currently affect the overall usability of the stack.
 
-## 3. 食用方法
+- **messages.py**: This file defines the underlying message formats of the DoIP protocol stack. I obtained these formats from Jacob Schaer's original project and made some slight adjustments. In Jacob Schaer's own words, "*Quoted descriptions were copied or paraphrased from ISO-13400-2-2019 (E).*" Therefore, I reused these formats to avoid reinventing the wheel.
 
-完整的client与stack配合的使用方法可以查看client-demo.py，其中stack对象与client对象是一对多的映射关系，client中需有一个master client负责DoIP节点的路由激活等工作。
+- **1driver_1app_client_demo.py**: This file is a demo that supports parallel operations and works in conjunction with the stack. It implements a basic `DoIPClient` class. By inheriting this class and redefining the necessary functions, you can implement your own functionalities. I'm merely providing a feasible approach to you experts, and I'll explain it in more detail below. Feel free to explore and expand upon it as needed.
+- **server.py**: This file contains a basic implementation of a DoIP ECU. To achieve quick implementation, I've used a rather rudimentary approach to handle some routine responses.
+
+## 3. Usage
+To see the complete usage of how the client and stack work together, you can refer to the `1driver_1app_client_demo.py` file. In this file, there is a one-to-many mapping between stack objects and client objects. Inside the client implementation, there should be a master client responsible for tasks like DoIP node routing activation.
+
+Feel free to explore `1driver_1app_client_demo.py` for a detailed understanding of how the stack and client interact and how the master client handles tasks related to DoIP node routing activation and other responsibilities.
 
 ```python
 # initialization
@@ -80,9 +85,11 @@ else:
     log.error("EDGE NODE connect failed.")
 ```
 
-每一个client对象都是继承自threading.Thread对象并通过注册函数注册到stack，从而形成stack一对多映射client的关系。实现的时候你可以继承我提供的DoIPClient的对象，重载所有的回调函数即可；你也可以通过修改stack的相关参数，实现你想要的额外功能。You can do what the friendly you want to do, just get the friendly code.
+Each client object inherits from the `threading.Thread` object and is registered with the stack through registration functions, creating a one-to-many mapping relationship between the stack and clients. During implementation, you can inherit from the `DoIPClient` object I've provided and override all the callback functions. Alternatively, you can modify the relevant parameters of the stack to achieve additional functionalities you desire. You have the freedom to do what you'd like, just grab the friendly code.
 
-此外，我还在demo中提供了一些有限状态机的建议，如UDS的状态、刷写的状态、消息解析器的状态等，你可以参考我的代码来实现你的上位机。
+Furthermore, I've also provided suggestions for finite state machines in the demo, such as states for UDS, flashing, message parsers, and more. You can refer to my code to implement your upper-level functionalities.
+
+Feel free to adapt the provided code to your needs and explore the options that best suit your requirements.
 
 ```python
 class UDSState(IntEnum):
@@ -175,9 +182,9 @@ class Parser:
         return parsed_list
 ```
 
-stack与client之间的纽带是相应的发送函数的回调函数，在回调函数中可以执行相应的threading.Event()的操作，该变量相当于一个semaphore。当然，你也可以完全重构我的代码，推导重来。
+The link between the stack and the client is established through callback functions for corresponding sending functions. These callback functions can perform operations using `threading.Event()` variables, which act as semaphores. You have the flexibility to perform various actions within these callback functions. Of course, you can also completely redesign the code if you prefer to start from scratch.
 
-另外，我还实现了一个普通的定时器类，你也可以继承该类，实现诸如定时发送tester present等功能。
+Additionally, I've implemented a basic timer class. You can also inherit from this class to implement functionalities such as sending "Tester Present" messages at certain intervals.
 
 ```python
 class RepeatTimer(Timer):
@@ -193,23 +200,24 @@ def tester_present(client):
         log.info("tester present")
 ```
 
-## 4. 运行环境
-理论上你可以在所有支持Python3的平台运行，我使用的是Python3.9.9 32-bit版本。
+## 4. Environment
 
-## 5. 待办项
+In theory, you can run the code on any platform that supports Python 3. I developed it using Python 3.9.9 32-bit version, but it should work on other Python 3 versions as well.
 
-1. UDP部分
-2. TCP剩余一小部分
-3. 单元测试部分
-4. 也许可以改一改stack发送队列
-5. 也许实现一个DoIP Server Simulator
+## 5. To-Do
 
-## 6. 值得一提的事
+1. Complete the UDP implementation.
+2. Finish the remaining parts of the TCP implementation.
+3. Implement unit testing to ensure the code's robustness and correctness.
+4. Consider optimizing the stack's sending queue for better performance.
+5. Potentially optimize the DoIP Server Simulator to enhance testing and simulation capabilities.
 
-过程中给我的一些便利以及帮助，如:
+## 6. MISC
 
-- 日本友人实现的带图形界面的[DoIP模拟器](https://github.com/hiro-telecom-engineer/python-doip)，对于新接触的人来说可以非常直观的感受到对于DoIP流程的交互
-- 好用的现成库，如ECU文件解析的库`hexrec`，如xml文件解析的库`xml`，也如Python自带的强大log工具`logging`
-- 强大的网络工具`wireshark`
-- 来自华为上研所我的[PigB队友](https://gitee.com/zhaoyingzhuo)~~陪我打游戏~~的鼓励与支持
-- 如果你觉得好用，联系我，我可以请你喝一杯咖啡:coffee:
+Throughout the process, I've encountered several conveniences and received help from various sources, such as:
+
+- There's a graphically-oriented [DoIP simulator](https://github.com/hiro-telecom-engineer/python-doip) created by a Japanese friend. It can provide an intuitive understanding of the DoIP interaction process, especially for newcomers to it.
+- Useful existing libraries such as `hexrec` for ECU file parsing, `xml` for XML file parsing, and Python's built-in powerful logging tool, `logging`, can greatly simplify various aspects of your project.
+- The robust network tool, `Wireshark`, can be instrumental in analyzing network communication and debugging.
+- Support and encouragement from [my PigB teammate at Huawei](https://gitee.com/zhaoyingzhuo) have surely played a positive role in my project's progress.
+- If you find the project useful, feel free to contact me. I'd be happy to treat you to a cup of coffee:coffee:.
